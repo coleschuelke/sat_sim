@@ -8,14 +8,29 @@ class PhysicsEngine:
     Docstring for PhysicsEngine
     """
     @staticmethod
-    def calculate_gravity(mass, position):
-        r_mag = np.linalg.norm(position)
-        if r_mag == 0:
-            return np.zeros(3)
+    def calculate_gravity(position):
+        """
+        Calculates the gravitational acceleration including the J2 perturbation
         
-        force_mag = (config.G * config.EARTH_MASS * mass) / (r_mag ** 2)
-        force_dir = -position / r_mag
-        return force_mag * force_dir
+        :param position: Description
+        """
+        x, y, z = position 
+        r_sq = x**2 + y**2 + z**2
+        r_mag = np.sqrt(r_sq)
+        mu_r3 = (config.G * config.EARTH_MASS) / (r_mag**2)
+
+        j2_factor = 1.5 * config.J2 * (config.EARTH_RADIUS / r_mag)**2
+
+        z2_r2 = 5 * (z**2 / r_sq)
+
+        txy = 1 + j2_factor * (1 - z2_r2)
+        tz = 1 + j2_factor * (3 - z2_r2)
+
+        ax = -mu_r3 * x * txy
+        ay = -mu_r3 * y * txy
+        az = -mu_r3 * z * tz
+
+        return np.array([ax, ay, az])
     
     def eom(self, t, x, entity): # Can add control input later
         """
@@ -26,7 +41,19 @@ class PhysicsEngine:
         :param x: Description
         :param mass: Description
         """
-        pass
+        position = x[0:3]
+        velocity = x[3:6]
+
+        acc_gravity = self.calculate_gravity(position)
+
+        thrust_force = entity.get_thrust_vector(current_velocity=velocity)
+        acc_thrust = thrust_force / entity.mass
+
+        total_acc = acc_gravity + acc_thrust
+
+        dxdt = np.concatenate((velocity, total_acc))
+
+        return dxdt
     
     def propagate(self, entity, t, dt):
         """
@@ -36,14 +63,14 @@ class PhysicsEngine:
         :param entity: Description
         :param dt: Description
         """
-        x0 = np.zeros(6)
+        x0 = entity.state
         
         sol = solve_ivp(
             fun=self.eom,
             t_span=(t, t+dt),
             y0=x0,
             method='RK45', 
-            args=(entity.mass), 
+            args=(entity,), 
             rtol=1e-6,
             atol=1e-9    
         )
@@ -51,3 +78,6 @@ class PhysicsEngine:
         final_state = sol.y[:, -1]
         final_positon = final_state[0:3]
         final_velocity = final_state[3:6]
+
+        entity.position = final_positon
+        entity.velocity = final_velocity
