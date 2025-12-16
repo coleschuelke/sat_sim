@@ -6,6 +6,7 @@ import numpy as np
 import config as cfig
 from core import DataLogger, PhysicsEngine
 from objects import Satellite
+from utils import Quaternion
 
 # The main caller script for my satellite simulation
 
@@ -17,21 +18,23 @@ def main():
 
     engine = PhysicsEngine()
 
-    sat1 = Satellite(
-        'Sat1', 
-        500, 
-        np.zeros((4, 4)), 
-        np.array((0, 0, 1500000 + cfig.EARTH_RADIUS)), 
-        np.array((9000, 0, 0)),
-        np.zeros(4)
+    sat1 = Satellite( # update these inits with attitude
+        name='Sat1', 
+        mass=500, 
+        inertia=np.diag([500, 500, 600]), 
+        position=np.array((0, 0, 1500000 + cfig.EARTH_RADIUS)), 
+        velocity=np.array((9000, 0, 0)),
+        attitude=Quaternion(1, 0, 0, 0),
+        angular_velocity=[0.3, 0.05, 0.1]
     )
     sat2 = Satellite(
-        'Sat2', 
-        500, 
-        np.zeros((4, 4)), 
-        np.array((0, 0, 1500000 + cfig.EARTH_RADIUS)), 
-        np.array((np.cos(15)*7800, np.sin(15)*7800, 0)),
-        np.zeros(4)
+        name='Sat2', 
+        mass=500, 
+        inertia=np.diag([400, 300, 500]), 
+        position=np.array((0, 0, 400000 + cfig.EARTH_RADIUS)), 
+        velocity=np.array((7800*np.cos(45), 7800*np.sin(45), 0)),
+        attitude=Quaternion(1, 2, 3, 4),
+        angular_velocity=[0.3, 0.0, 0.1]
     )
 
     constellation = [sat1, sat2]

@@ -2,6 +2,7 @@ import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from utils import Quaternion
 
 import config
 
@@ -147,6 +148,41 @@ def animate_orbit(data, save_path=None):
         ani.save(save_path, writer='pillow', fps=30)
     else:
         return ani
+    
+def plot_attitude(data):
+    """
+    Plots Roll, Pitch, and Yaw over time for each satellite.
+    """
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(10, 10))
+    
+    for name, group in data.groupby('name'):
+        # 1. Extract Quaternion Columns as a Matrix (N, 4)
+        q_data = group[['qw', 'qx', 'qy', 'qz']].to_numpy()
+        
+        # 2. Vectorized Conversion (Fast!)
+        euler_rad = Quaternion.quat_to_euler(q_data)
+        
+        # 3. Convert to Degrees for readability
+        euler_deg = np.degrees(euler_rad)
+        roll, pitch, yaw = euler_deg[:, 0], euler_deg[:, 1], euler_deg[:, 2]
+        
+        ax1.plot(group['time'], roll, label=name)
+        ax2.plot(group['time'], pitch, label=name)
+        ax3.plot(group['time'], yaw, label=name)
+        
+    ax1.set_ylabel('Roll (deg)')
+    ax1.set_title('Satellite Attitude')
+    ax1.grid(True)
+    ax1.legend()
+    
+    ax2.set_ylabel('Pitch (deg)')
+    ax2.grid(True)
+    
+    ax3.set_ylabel('Yaw (deg)')
+    ax3.set_xlabel('Time (s)')
+    ax3.grid(True)
+    
+    plt.tight_layout()
 
 def _set_axes_equal(ax):
     """

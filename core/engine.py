@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import config
+from utils import Quaternion
 
 
 class PhysicsEngine:
@@ -43,7 +44,10 @@ class PhysicsEngine:
         """
         position = x[0:3]
         velocity = x[3:6]
+        attitude = Quaternion(*x[6:10]) # Normalized at initialization
+        omega = x[10:13]
 
+        # Linear
         acc_gravity = self.calculate_gravity(position)
 
         thrust_force = entity.get_thrust_vector(current_velocity=velocity)
@@ -51,7 +55,16 @@ class PhysicsEngine:
 
         total_acc = acc_gravity + acc_thrust
 
-        dxdt = np.concatenate((velocity, total_acc))
+        # Rotational
+        q_dot = attitude.rate_of_change(omega)
+        torque = np.zeros(3) # No current sources of angular velocity
+
+        I = entity.inertia
+        H = I @ omega
+
+        alpha = np.linalg.inv(I) @ (torque - np.cross(omega, H))
+
+        dxdt = np.concatenate((velocity, total_acc, q_dot, alpha))
 
         return dxdt
     
@@ -63,7 +76,7 @@ class PhysicsEngine:
         :param entity: Description
         :param dt: Description
         """
-        x0 = np.concatenate((entity.position, entity.velocity))
+        x0 = np.concatenate((entity.position, entity.velocity, entity.attitude.q, entity.angular_velocity))
         
         sol = solve_ivp(
             fun=self.eom,
@@ -78,6 +91,10 @@ class PhysicsEngine:
         final_state = sol.y[:, -1]
         final_positon = final_state[0:3]
         final_velocity = final_state[3:6]
+        final_attitude = final_state[6:10]
+        final_angular_velocity = final_state[10:13]
 
         entity.position = final_positon
         entity.velocity = final_velocity
+        entity.attitude = Quaternion(*final_attitude)
+        entity.angular_velocity = final_angular_velocity

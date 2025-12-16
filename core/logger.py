@@ -14,28 +14,28 @@ class DataLogger:
         
         # Write Header immediately
         self.writer.writerow([
-            'time', 
-            'name',
-            'rx', 'ry', 'rz',     # Position
-            'vx', 'vy', 'vz',     # Velocity
-            'mass', 'thrust_on'   # State
+            'time', 'name',
+            'rx', 'ry', 'rz', 
+            'vx', 'vy', 'vz',
+            'qw', 'qx', 'qy', 'qz',    # <--- NEW: Quaternion
+            'wx', 'wy', 'wz',          # <--- NEW: Angular Velocity
+            'mass', 'thrust_on'
         ])
 
-    def log_step(self, time, entity):
-        """
-        Extracts state from satellite and writes a row.
-        """
-        # Unpack numpy arrays for clean CSV writing
-        # TODO: use the state in the future
-        rx, ry, rz = entity.position
-        vx, vy, vz = entity.velocity
+    def log_step(self, time, satellite):
+        rx, ry, rz = satellite.position
+        vx, vy, vz = satellite.velocity
+        qw, qx, qy, qz = satellite.attitude.q
+        wx, wy, wz = satellite.angular_velocity
         
         row = [
-            time,
-            entity.name,
+            time, satellite.name,
             rx, ry, rz,
             vx, vy, vz,
-            entity.mass,
+            qw, qx, qy, qz,   # <--- Log them
+            wx, wy, wz,       # <--- Log them
+            satellite.mass,
+            0
             # int(satellite.thrust_is_on)
         ]
         self.writer.writerow(row)

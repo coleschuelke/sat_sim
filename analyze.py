@@ -6,8 +6,8 @@ import sys
 import matplotlib.pyplot as plt
 
 # Import your functional plotting library
-from visualization.plotter import (animate_orbit, load_data, plot_orbit_3d,
-                                   plot_telemetry)
+from visualization.plotter import (animate_orbit, load_data, plot_attitude,
+                                   plot_orbit_3d, plot_telemetry)
 
 
 def get_latest_csv(directory="Data"):
@@ -52,6 +52,9 @@ if __name__ == "__main__":
 
     print("Generating Telemetry...")
     plot_telemetry(df)
+
+    print("Generating Attitude...")  # <--- Add this section
+    plot_attitude(df)
     
     print("Generating 3D Orbit...")
     plot_orbit_3d(df)
