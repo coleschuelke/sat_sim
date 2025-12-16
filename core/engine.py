@@ -17,7 +17,7 @@ class PhysicsEngine:
         x, y, z = position 
         r_sq = x**2 + y**2 + z**2
         r_mag = np.sqrt(r_sq)
-        mu_r3 = (config.G * config.EARTH_MASS) / (r_mag**2)
+        mu_r3 = (config.G * config.EARTH_MASS) / (r_mag**3)
 
         j2_factor = 1.5 * config.J2 * (config.EARTH_RADIUS / r_mag)**2
 
@@ -63,7 +63,7 @@ class PhysicsEngine:
         :param entity: Description
         :param dt: Description
         """
-        x0 = entity.state
+        x0 = np.concatenate((entity.position, entity.velocity))
         
         sol = solve_ivp(
             fun=self.eom,

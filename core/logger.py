@@ -15,6 +15,7 @@ class DataLogger:
         # Write Header immediately
         self.writer.writerow([
             'time', 
+            'name',
             'rx', 'ry', 'rz',     # Position
             'vx', 'vy', 'vz',     # Velocity
             'mass', 'thrust_on'   # State
@@ -31,6 +32,7 @@ class DataLogger:
         
         row = [
             time,
+            entity.name,
             rx, ry, rz,
             vx, vy, vz,
             entity.mass,

@@ -17,28 +17,41 @@ def main():
 
     engine = PhysicsEngine()
 
-    sat = Satellite(
+    sat1 = Satellite(
         'Sat1', 
         500, 
         np.zeros((4, 4)), 
-        np.array([0, 0, 2000000 + cfig.EARTH_RADIUS]), 
-        np.array([7800, 0, 0]),
+        np.array((0, 0, 1500000 + cfig.EARTH_RADIUS)), 
+        np.array((9000, 0, 0)),
         np.zeros(4)
     )
+    sat2 = Satellite(
+        'Sat2', 
+        500, 
+        np.zeros((4, 4)), 
+        np.array((0, 0, 1500000 + cfig.EARTH_RADIUS)), 
+        np.array((np.cos(15)*7800, np.sin(15)*7800, 0)),
+        np.zeros(4)
+    )
+
+    constellation = [sat1, sat2]
 
     # GNC step
 
     # Physics step
     try:
         print(f"Running Sim")
+        logger.log_step(-1, sat1)
+        logger.log_step(-1, sat2)
 
         t = cfig.T0
         while t < cfig.TF:
-            # Step the phyics
-            engine.propagate(sat, t, cfig.DT)
+            for sat in constellation:
+                # Step the phyics
+                engine.propagate(sat, t, cfig.DT)
 
-            # Log the telemetry
-            logger.log_step(t, sat)
+                # Log the telemetry
+                logger.log_step(t, sat)
 
 
             t += cfig.DT
