@@ -81,9 +81,20 @@ class TwoBodyJ2(Environment):
         :param state: Description
         :param body: Description
         """
+        r_inertial = state[0:3]
+        attitude = Quaternion(*state[6:10])
+        I = body.inertia
+        mu = config.G * config.EARTH_MASS
+        r5 = np.linalg.norm(r_inertial) ** 5
+        r_body = attitude.conjugate().rotate_vector(r_inertial)
+
+        tau_gg = 3*mu * np.cross(r_body, I @ r_body) / r5
+
+        tau_total = tau_gg
         
-        # TODO: implement gravity gradient
-        return np.zeros(3)
+        # TODO: Drag
+
+        return tau_total
 
 
 class CR3BP(Environment):

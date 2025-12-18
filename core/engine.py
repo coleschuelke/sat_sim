@@ -40,7 +40,7 @@ class PhysicsEngine:
         control_torques = np.zeros(3)
 
         total_torques = env_torques + control_torques
-
+        # print(total_torques)
         # Dynamics
         v_dot = total_forces / body.mass
         omega_dot = np.linalg.inv(I) @ (total_torques - np.cross(omega, H))
@@ -48,6 +48,7 @@ class PhysicsEngine:
         # Kinematics
         r_dot = velocity
         q_dot = attitude.rate_of_change(omega)
+        # print(q_dot)
 
         # Derivative of state for integration
         dxdt = np.concatenate((r_dot, v_dot, q_dot, omega_dot))
@@ -79,6 +80,7 @@ class PhysicsEngine:
         final_velocity = final_state[3:6]
         final_attitude = final_state[6:10]
         final_angular_velocity = final_state[10:13]
+        print(final_attitude)
 
         body.position = final_positon
         body.velocity = final_velocity

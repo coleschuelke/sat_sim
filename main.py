@@ -24,11 +24,11 @@ def main():
     sat1 = Satellite(
         name='Sat1', 
         mass=500, 
-        inertia=np.diag([500, 500, 600]), 
+        inertia=np.diag([10, 10, 2]), 
         position=np.array((0, 0, 1500000 + cfig.EARTH_RADIUS)), 
         velocity=np.array((9000, 0, 0)),
-        attitude=Quaternion(1, 0, 0, 0),
-        angular_velocity=[0.003, 0.005, 0.001]
+        attitude=Quaternion(1, 2, 3, 4),
+        angular_velocity=[0.000, 0.000, 0.000]
     )
     sat2 = Satellite(
         name='Sat2', 
@@ -37,7 +37,7 @@ def main():
         position=np.array((0, 0, 400000 + cfig.EARTH_RADIUS)), 
         velocity=np.array((7800*np.cos(45), 7800*np.sin(45), 0)),
         attitude=Quaternion(1, 2, 3, 4),
-        angular_velocity=[0.003, 0.0, 0.001]
+        angular_velocity=[1e-6, 3e-6, -1e-6]
     )
 
     constellation = [sat1, sat2]
