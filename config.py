@@ -1,7 +1,7 @@
 # Sim params
 DT = 1.0  # s 
 T0 = 0 # s (Make these datetimes)
-TF = 1000 # s
+TF = 10000 # s
 
 # Environment params
 G = 6.67430e-11

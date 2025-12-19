@@ -88,7 +88,7 @@ class TwoBodyJ2(Environment):
         mu = config.G * config.EARTH_MASS
         r5 = np.linalg.norm(r_inertial) ** 5
         r_body = attitude.conjugate().rotate_vector(r_inertial) # Normal values
-        print(r_body)
+        # print(r_body)
 
         tau_gg = 3*mu * np.cross(r_body, I @ r_body) / r5
 

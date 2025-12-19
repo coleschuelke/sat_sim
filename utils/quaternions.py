@@ -1,11 +1,12 @@
 import numpy as np
 
 class Quaternion:
-    def __init__(self, w=1.0, x=0.0, y=0.0, z=0.0):
+    def __init__(self, w=1.0, x=0.0, y=0.0, z=0.0, normalize=True):
         # We store it as a numpy array for easy math later
         # Order: [w, x, y, z] (Scalar first is standard in physics/engineering)
         self.q = np.array([w, x, y, z], dtype=float)
-        self.normalize()
+        if normalize:
+            self.normalize()
 
     def normalize(self):
         """Ensures the quaternion has unit magnitude."""
@@ -22,7 +23,7 @@ class Quaternion:
         Formula: v' = q * v * q_conjugate
         """
         # 1. Convert vector to pure quaternion (0, vx, vy, vz)
-        v_quat = Quaternion(0, vector[0], vector[1], vector[2])
+        v_quat = Quaternion(0, vector[0], vector[1], vector[2], normalize=False)
         
         # 2. q * v
         temp = self @ v_quat
@@ -36,7 +37,7 @@ class Quaternion:
     def conjugate(self):
         """Returns the inverse rotation."""
         w, x, y, z = self.q
-        return Quaternion(w, -x, -y, -z)
+        return Quaternion(w, -x, -y, -z, normalize=False)
 
     def __matmul__(self, other):
         """
@@ -51,7 +52,7 @@ class Quaternion:
         z = w1*z2 + x1*y2 - y1*x2 + z1*w2
         
         # Return a new Quaternion object (auto-normalized by init)
-        return Quaternion(w, x, y, z)
+        return Quaternion(w, x, y, z, normalize=False)
 
     def __repr__(self):
         return f"Quat({self.q[0]:.3f}, [{self.q[1]:.3f}, {self.q[2]:.3f}, {self.q[3]:.3f}])"
