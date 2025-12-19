@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.integrate import solve_ivp
+
 import config
 from utils import Quaternion
 
@@ -44,11 +45,12 @@ class PhysicsEngine:
         # Dynamics
         v_dot = total_forces / body.mass
         omega_dot = np.linalg.inv(I) @ (total_torques - np.cross(omega, H))
-
+        # print('total torques: ', total_torques)
         # Kinematics
         r_dot = velocity
         q_dot = attitude.rate_of_change(omega)
-        # print(q_dot)
+        # print('qdot: ', q_dot)
+        # print('omegadot:, ', omega_dot)
 
         # Derivative of state for integration
         dxdt = np.concatenate((r_dot, v_dot, q_dot, omega_dot))
@@ -64,7 +66,7 @@ class PhysicsEngine:
         :param dt: Description
         """
         x0 = np.concatenate((body.position, body.velocity, body.attitude.q, body.angular_velocity))
-        
+
         sol = solve_ivp(
             fun=self.eom,
             t_span=(t, t+dt),
@@ -80,7 +82,7 @@ class PhysicsEngine:
         final_velocity = final_state[3:6]
         final_attitude = final_state[6:10]
         final_angular_velocity = final_state[10:13]
-        print(final_attitude)
+        # print(final_attitude)
 
         body.position = final_positon
         body.velocity = final_velocity
