@@ -1,0 +1,71 @@
+import numpy as np
+import config # Assuming this has your G and EARTH_MASS
+
+def kepler_to_cartesian(a, e, i, Omega, omega, nu, mu=None):
+    """
+    Converts Keplerian Orbital Elements to Cartesian State Vector (Inertial Frame).
+    
+    :param a: Semi-major axis (meters)
+    :param e: Eccentricity (dimensionless)
+    :param i: Inclination (radians)
+    :param Omega: Right Ascension of Ascending Node (RAAN) (radians)
+    :param omega: Argument of Perigee (radians)
+    :param nu: True Anomaly (radians) - The angle of the sat in the orbit
+    :param mu: Gravitational Parameter (GM). Defaults to Earth if None.
+    
+    :return: (r_vec, v_vec) numpy arrays in Inertial Frame
+    """
+    if mu is None:
+        mu = config.G * config.EARTH_MASS
+
+    # 1. SOLVE IN PERIFOCAL FRAME (PQW)
+    # The satellite is strictly in the P-Q plane (z=0)
+    
+    # Calculate distance 'r' from the focus (Earth)
+    # Polar equation of a conic section
+    p = a * (1 - e**2) # Semi-latus rectum
+    r_mag = p / (1 + e * np.cos(nu))
+    
+    # Position in Perifocal:
+    # x = r * cos(nu), y = r * sin(nu)
+    r_pqw = np.array([
+        r_mag * np.cos(nu),
+        r_mag * np.sin(nu),
+        0.0
+    ])
+    
+    # Velocity in Perifocal:
+    # Requires derivative of polar coordinates.
+    # v_x = -sqrt(mu/p) * sin(nu)
+    # v_y =  sqrt(mu/p) * (e + cos(nu))
+    coeff = np.sqrt(mu / p)
+    v_pqw = np.array([
+        -coeff * np.sin(nu),
+        coeff * (e + np.cos(nu)),
+        0.0
+    ])
+
+    # 2. ROTATE TO INERTIAL FRAME (ECI)
+    # We need to perform 3 rotations:
+    # R3(-Omega) * R1(-i) * R3(-omega)
+    
+    # Pre-compute trig functions for efficiency
+    cO = np.cos(Omega); sO = np.sin(Omega)
+    co = np.cos(omega); so = np.sin(omega)
+    ci = np.cos(i);     si = np.sin(i)
+    
+    # The Rotation Matrix (Perifocal -> Inertial)
+    # Derived from R_z(-Omega) @ R_x(-i) @ R_z(-omega)
+    R = np.array([
+        [cO*co - sO*so*ci,  -cO*so - sO*co*ci,   sO*si],
+        [sO*co + cO*so*ci,  -sO*so + cO*co*ci,  -cO*si],
+        [so*si,              co*si,              ci   ]
+    ])
+    
+    # 3. TRANSFORM
+    r_eci = R @ r_pqw
+    v_eci = R @ v_pqw
+    
+    return r_eci, v_eci
+
+print(kepler_to_cartesian(8413000, 0.01, 15, 0, 0, 0))

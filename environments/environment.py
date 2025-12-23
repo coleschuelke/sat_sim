@@ -81,14 +81,13 @@ class TwoBodyJ2(Environment):
         :param state: Description
         :param body: Description
         """
-        ### Something is going wrong in here ###
+
         r_inertial = state[0:3]
-        attitude = Quaternion(*state[6:10]) # expected values
-        I = body.inertia # Expected values
+        attitude = Quaternion(*state[6:10]) 
+        I = body.inertia 
         mu = config.G * config.EARTH_MASS
         r5 = np.linalg.norm(r_inertial) ** 5
-        r_body = attitude.conjugate().rotate_vector(r_inertial) # Normal values
-        # print(r_body)
+        r_body = attitude.conjugate().rotate_vector(r_inertial) 
 
         tau_gg = 3*mu * np.cross(r_body, I @ r_body) / r5
 

@@ -39,13 +39,23 @@ def main():
         attitude=Quaternion(1, 2, 3, 4),
         angular_velocity=[1e-6, 3e-6, -1e-6]
     )
+    sat3 = Satellite(
+        name='Sat3', 
+        mass=500,
+        inertia=np.diag([2, 2, 10]),
+        position=np.array((8328870.,       0.,       0.)),
+        velocity=np.array((    0.       , -5281.6014113,  4521.0159543)),
+        attitude=Quaternion(1, 2, 3, 4), 
+        angular_velocity=np.array((1e-12, 0, 0))
+    )
 
-    constellation = [sat1, sat2]
+    constellation = [sat1, sat2, sat3]
 
     try:
         print(f"Running Sim")
         logger.log_step(-1, sat1)
         logger.log_step(-1, sat2)
+        logger.log_step(-1, sat3)
 
         t = cfig.T0
         while t < cfig.TF:
